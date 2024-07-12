@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.SlashCommands;
+using Microsoft.Extensions.Logging;
 
 namespace SCPDiscord;
 
@@ -22,7 +23,7 @@ public class StartMessageScheduler
 public static class MessageScheduler
 {
 	private static ConcurrentDictionary<ulong, ConcurrentQueue<string>> messageQueues = new ConcurrentDictionary<ulong, ConcurrentQueue<string>>();
-	private static List<InteractionContext> interactionCache = new List<InteractionContext>();
+	public static List<InteractionContext> interactionCache = new List<InteractionContext>();
 
 	public static async Task Init()
 	{
@@ -37,7 +38,12 @@ public static class MessageScheduler
 			}
 
 			// Clean old interactions from cache
+			List<InteractionContext> oldInteractionCache = interactionCache;
 			interactionCache.RemoveAll(x => x.InteractionId.GetSnowflakeTime() < DateTimeOffset.Now - TimeSpan.FromSeconds(30));
+			foreach (InteractionContext interaction in oldInteractionCache.Except(interactionCache))
+			{
+				Logger.Warn("Cached interaction timed out: " + interaction.InteractionId);
+			}
 
 			try
 			{
@@ -76,7 +82,7 @@ public static class MessageScheduler
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e);
+				Logger.Error("Error processing message queue: " + e);
 			}
 		}
 	}
@@ -89,12 +95,16 @@ public static class MessageScheduler
 
 	public static bool TryUncacheInteraction(ulong interactionID, out InteractionContext interaction)
 	{
+		// TODO: Debug
+		Logger.Log("Removing interaction from cache: " + interactionID, LogID.DISCORD);
 		interaction = interactionCache.FirstOrDefault(x => x.InteractionId == interactionID);
 		return interactionCache.Remove(interaction);
 	}
 
 	public static void CacheInteraction(InteractionContext interaction)
 	{
+		// TODO: Debug
+		Logger.Log("Adding interaction to cache: " + interaction.InteractionId, LogID.DISCORD);
 		interactionCache.Add(interaction);
 	}
 }

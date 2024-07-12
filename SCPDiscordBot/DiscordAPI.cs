@@ -218,6 +218,7 @@ namespace SCPDiscord
 			{
 				try
 				{
+					string cacheEntries = string.Join(", ",MessageScheduler.interactionCache.Select(x => x.InteractionId));
 					if (MessageScheduler.TryUncacheInteraction(interactionID, out InteractionContext interaction))
 					{
 						await interaction.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(message));
@@ -225,6 +226,7 @@ namespace SCPDiscord
 					else
 					{
 						Logger.Error("Couldn't find interaction in the cache, sending as normal message instead.");
+						Logger.Error("Interactions in cache: " + cacheEntries);
 						await SendMessage(channelID, message);
 					}
 				}
@@ -250,6 +252,7 @@ namespace SCPDiscord
 			{
 				try
 				{
+					string cacheEntries = string.Join(", ",MessageScheduler.interactionCache.Select(x => x.InteractionId));
 					if (MessageScheduler.TryUncacheInteraction(interactionID, out InteractionContext interaction))
 					{
 						await interaction.Interaction.SendPaginatedResponseAsync(false, interaction.User, message, default,
@@ -258,6 +261,7 @@ namespace SCPDiscord
 					else
 					{
 						Logger.Error("Couldn't find interaction in the cache, sending as normal message instead.");
+						Logger.Error("Interactions in cache: " + cacheEntries);
 						await SendPaginatedMessage(channelID, userID, message);
 					}
 				}
