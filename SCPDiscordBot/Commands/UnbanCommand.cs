@@ -1,30 +1,30 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus.SlashCommands;
+﻿using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
+using System.Threading.Tasks;
 
 namespace SCPDiscord.Commands
 {
-  public class UnbanCommand : ApplicationCommandModule
-  {
-    [SlashRequireGuild]
-    [SlashCommand("unban", "Unbans a player from the server")]
-    public async Task OnExecute(InteractionContext command, [Option("SteamIDorIP", "Steam ID or IP of the user to unban.")] string steamIDOrIP)
+    public class UnbanCommand : ApplicationCommandModule
     {
-      await command.DeferAsync();
-      Interface.MessageWrapper message = new Interface.MessageWrapper
-      {
-        UnbanCommand = new Interface.UnbanCommand
+        [SlashRequireGuild]
+        [SlashCommand("unban", "Unbans a player from the server")]
+        public async Task OnExecute(InteractionContext command, [Option("SteamIDorIP", "Steam ID or IP of the user to unban.")] string steamIDOrIP)
         {
-          ChannelID = command.Channel.Id,
-          SteamIDOrIP = steamIDOrIP,
-          InteractionID = command.InteractionId,
-          DiscordDisplayName = command.Member.DisplayName,
-          DiscordUsername = command.Member.Username,
-          DiscordUserID = command.Member.Id
+            await command.DeferAsync();
+            Interface.MessageWrapper message = new Interface.MessageWrapper
+            {
+                UnbanCommand = new Interface.UnbanCommand
+                {
+                    ChannelID = command.Channel.Id,
+                    SteamIDOrIP = steamIDOrIP,
+                    InteractionID = command.InteractionId,
+                    DiscordDisplayName = command.Member.DisplayName,
+                    DiscordUsername = command.Member.Username,
+                    DiscordUserID = command.Member.Id
+                }
+            };
+            MessageScheduler.CacheInteraction(command);
+            await NetworkSystem.SendMessage(message, command);
         }
-      };
-      MessageScheduler.CacheInteraction(command);
-      await NetworkSystem.SendMessage(message, command);
     }
-  }
 }
